@@ -3,7 +3,7 @@
 scrapes tournament standings from swcpoker.club
 
 ## Motivations
-I wanted a cool standings widget for my poker tournament streams on Twitch.  twtich.tv/cornbl4ster
+I wanted a cool standings widget for my poker tournament streams on Twitch.  https://twtich.tv/cornbl4ster
 
 ## Installation
 1. Install node v 15.9.0
