@@ -15,3 +15,4 @@ scrapes tournament standings from swcpoker.club
 See https://api.dev.proxycrawler.com/swc_tournament_standings
 
 
+<img src="https://cybergrime.net/swcdemo.png" />
