@@ -3,14 +3,9 @@ var fs = require('fs')
 const util = require('util');
 const writeFile = util.promisify(fs.writeFile)
 
-function printWaited() {
-  console.log('waited')
-}
-
 
 
 const waitAFewSeconds = async () => {
-
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve(console.log('waited'))
@@ -29,7 +24,6 @@ const waitFor = async (timeToWait) => {
 }
 
 const main = async () => {
-
   const browser = await puppeteer.launch()
   const page = await browser.newPage()
   await page.setViewport({
@@ -122,31 +116,6 @@ const main = async () => {
 
       }
     }
-
-
-
-
-
-
-    /*
-    if (response.hasOwnProperty('payloadData')) {
-      "foo".match()
-      
-      if(jsonData) {
-        debugger
-        jsonData = jsonData.groups(1)
-      }
-      console.log(jsonData)
-      try {
-        jsonData = JSON.parse(jsonData)
-        console.log(jsonData)
-      }
-      catch(err) {
-        console.log("error on parse:", err)
-      }
-      
-    }
-    */
   })
 
   cdp.on('Network.webSocketFrameReceived', parseResponse); // Fired when WebSocket message is received.
@@ -172,47 +141,38 @@ const main = async () => {
   console.log(this.tournamentAndPlayers)
   let tournamentKeys = Object.keys(this.tournamentAndPlayers)
   sortedRankings = {}
-  
-  for(let i =0; i < tournamentKeys.length; i++) {
+
+  for (let i = 0; i < tournamentKeys.length; i++) {
     let unsorted = []
     let currTournament = this.tournamentAndPlayers[tournamentKeys[i]]
     let playerKeys = Object.keys(currTournament)
-    for(let j=0; j<playerKeys.length; j++) {
-        let playerData = currTournament[playerKeys[j]]
-        playerData['playerName'] = playerKeys[j]
-        unsorted.push(playerData)
+    for (let j = 0; j < playerKeys.length; j++) {
+      let playerData = currTournament[playerKeys[j]]
+      playerData['playerName'] = playerKeys[j]
+      unsorted.push(playerData)
     }
-    let sorted = unsorted.sort((a,b) => (a.position > b.position ? 1: -1))
+    let sorted = unsorted.sort((a, b) => (a.position > b.position ? 1 : -1))
     sortedRankings[tournamentKeys[i]] = sorted
-    
+
   }
 
-  
+
   console.log(sortedRankings)
 
   await writeFile('./tournamentRankings.json', JSON.stringify(this.tournamentAndPlayers))
   await writeFile('./sortedRankings.json', JSON.stringify(sortedRankings))
-  
+
   await page.close()
   await browser.close()
 
-
-
-
 }
 
+const runContinuously = async function() {
+  while(true) {
+    await main()
+  }
+}
 
-
-
-
-
-
-
-
-
-
-
-  
-main()
+runContinuously()
 
 
