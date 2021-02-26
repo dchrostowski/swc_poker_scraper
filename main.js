@@ -5,14 +5,15 @@ const writeFile = util.promisify(fs.writeFile)
 
 const waitFor = async (timeToWait) => {
   return new Promise((resolve) => {
+    console.log("Waiting ", timeToWait / 1000, " seconds...")
     setTimeout(() => {
-      resolve(console.log('waited'))
+      resolve(console.log('Finsihed waiting.'))
     }, timeToWait)
 
   })
 }
 
-const main = async () => {
+const main = async (getCompleted) => {
 
   const printRequest = response => console.log('request: ', response);
 
@@ -35,6 +36,7 @@ const main = async () => {
 
         let rawPlayers = jsonData2.players
 
+
         rawPlayers.forEach((player) => {
 
           let playerName = player['player-nick']
@@ -43,11 +45,12 @@ const main = async () => {
           let expectedPlace = player['expected-place'] + 1
           let playerRate = player['player-rate']
           let isPro = player['pro']
+          let mainPrize = player['main-prize-amount'] / 100
           if (place < 0) place = player['expected-place']
           if (place >= 0) {
             place = place + 1
 
-            this.tournamentAndPlayers[tourneyName][playerName] = { 'position': place, 'chips': chips, 'expectedPosition': expectedPlace, 'playerRating': playerRate, 'isPro': isPro }
+            this.tournamentAndPlayers[tourneyName][playerName] = { 'position': place, 'chips': chips, 'expectedPosition': expectedPlace, 'playerRating': playerRate, 'isPro': isPro, 'prize': mainPrize }
           }
         })
 
@@ -67,10 +70,10 @@ const main = async () => {
 
     this.tournamentAndPlayers = {}
 
-
+    console.log("Loading play.swcpoker.club...")
     await page.goto('https://play.swcpoker.club', { waitUntil: 'networkidle0', timeout: 60000 })
     const [signin, forgot, signup, cancel] = await page.$x('//div[@class="simple-button-content"]')
-
+    console.log("Navigating to lobby...")
     await cancel.click()
     await waitFor(3000)
 
@@ -85,15 +88,12 @@ const main = async () => {
 
     const runningDivs = await page.$x('//div[@class="panel tournament-line running"]')
     const latRegDivs = await page.$x('//div[@class="panel tournament-line late-registration running"]')
+
     const tournamentDivs = runningDivs.concat(latRegDivs)
 
     const cdp = await page.target().createCDPSession();
     await cdp.send('Network.enable');
     await cdp.send('Page.enable');
-
-
-
-
 
     cdp.on('Network.webSocketFrameReceived', parseResponse); // Fired when WebSocket message is received.
     cdp.on('Network.webSocketFrameSent', printRequest);
@@ -101,13 +101,36 @@ const main = async () => {
     for (let i = 0; i < tournamentDivs.length; i++) {
       let refreshRunning = await page.$x('//div[@class="panel tournament-line running"]')
       let refreshLateReg = await page.$x('//div[@class="panel tournament-line late-registration running"]')
+
       let refreshDivs = refreshRunning.concat(refreshLateReg)
       let div = refreshDivs[i]
       await div.click()
-      await waitFor(10000)
+      await waitFor(5000)
       let [backButton] = await page.$x('//div[@class="navigation-panel-back-content"]')
       await backButton.click()
-      await waitFor(3000)
+      await waitFor(5000)
+
+    }
+
+
+    if (getCompleted) {
+      let [statusButton] = await page.$x('//div[@class="tournament-list-header"]/div[contains(@class,"tournament-status")]')
+      await statusButton.click()
+      await waitFor(2000)
+      await statusButton.click()
+      await waitFor(2000)
+      const completedDivs = await page.$x('//div[@class="tournaments"]//div[@class="panel tournament-line completed"]')
+
+      for (let i = 0; i < completedDivs.length; i++) {
+        let refreshCompleted = await page.$x('//div[@class="tournaments"]//div[@class="panel tournament-line completed"]')
+        let div = refreshCompleted[i]
+        await div.click()
+        await waitFor(5000)
+        let [backButton] = await page.$x('//div[@class="navigation-panel-back-content"]')
+        await backButton.click()
+        await waitFor(5000)
+
+      }
 
     }
 
@@ -118,13 +141,25 @@ const main = async () => {
       let unsorted = []
       let currTournament = this.tournamentAndPlayers[tournamentKeys[i]]
       let playerKeys = Object.keys(currTournament)
+      let completed = false
       for (let j = 0; j < playerKeys.length; j++) {
+
         let playerData = currTournament[playerKeys[j]]
+        if (playerData.prize > 0) {
+          completed = true
+        }
         playerData['playerName'] = playerKeys[j]
-        simplifiedPlayerData = { 'playerName': playerKeys[j], 'position': playerData.position, 'chips': playerData.chips }
+        simplifiedPlayerData = { 'playerName': playerKeys[j], 'position': playerData.position, 'chips': playerData.chips, 'prize': playerData.prize }
         unsorted.push(simplifiedPlayerData)
       }
       let sorted = unsorted.sort((a, b) => (a.position > b.position ? 1 : -1))
+      for (let k = 0; k < sorted.length; k++) {
+        let entry = sorted[k]
+        if (completed) delete entry.chips
+        else delete entry.prize
+        sorted[k] = entry
+      }
+
       sortedRankings[tournamentKeys[i]] = sorted
 
     }
@@ -148,11 +183,14 @@ const main = async () => {
 }
 
 const runContinuously = async function () {
+  let getCompleted = false
+  if (process.argv[2] === "--get-completed") getCompleted = true
   while (true) {
-    await main()
+    await main(getCompleted)
 
   }
 }
+
 
 runContinuously()
 
