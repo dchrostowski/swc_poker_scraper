@@ -75,16 +75,16 @@ const main = async (getCompleted) => {
     const [signin, forgot, signup, cancel] = await page.$x('//div[@class="simple-button-content"]')
     console.log("Navigating to lobby...")
     await cancel.click()
-    await waitFor(3000)
+    await waitFor(1500)
 
     const [lobby_div] = await page.$x('//div[@class="navigation-panel-back-content"]')
     await lobby_div.click()
-    await waitFor(3000)
+    await waitFor(1500)
 
 
     const [tournaments_btn] = await page.$x('//div[@class="menu-item-content" and text()="Tournaments"]')
     await tournaments_btn.click()
-    await waitFor(3000)
+    await waitFor(1500)
 
     const runningDivs = await page.$x('//div[@class="panel tournament-line running"]')
     const latRegDivs = await page.$x('//div[@class="panel tournament-line late-registration running"]')
@@ -105,10 +105,10 @@ const main = async (getCompleted) => {
       let refreshDivs = refreshRunning.concat(refreshLateReg)
       let div = refreshDivs[i]
       await div.click()
-      await waitFor(5000)
+      await waitFor(3000)
       let [backButton] = await page.$x('//div[@class="navigation-panel-back-content"]')
       await backButton.click()
-      await waitFor(5000)
+      await waitFor(3000)
 
     }
 
@@ -125,10 +125,10 @@ const main = async (getCompleted) => {
         let refreshCompleted = await page.$x('//div[@class="tournaments"]//div[@class="panel tournament-line completed"]')
         let div = refreshCompleted[i]
         await div.click()
-        await waitFor(5000)
+        await waitFor(3000)
         let [backButton] = await page.$x('//div[@class="navigation-panel-back-content"]')
         await backButton.click()
-        await waitFor(5000)
+        await waitFor(3000)
 
       }
 
