@@ -155,8 +155,8 @@ const main = async (getCompleted) => {
       let sorted = unsorted.sort((a, b) => (a.position > b.position ? 1 : -1))
       for (let k = 0; k < sorted.length; k++) {
         let entry = sorted[k]
-        if (completed) delete entry.chips
-        else delete entry.prize
+        //if (completed) delete entry.chips
+        //else delete entry.prize
         sorted[k] = entry
       }
 
