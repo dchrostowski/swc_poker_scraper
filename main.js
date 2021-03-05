@@ -145,7 +145,7 @@ const main = async (getCompleted) => {
       for (let j = 0; j < playerKeys.length; j++) {
 
         let playerData = currTournament[playerKeys[j]]
-        if (playerData.prize > 0) {
+        if (playerData.prize > 0 && !playerData.chips) {
           completed = true
         }
         playerData['playerName'] = playerKeys[j]
