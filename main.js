@@ -105,7 +105,7 @@ const main = async (getCompleted) => {
       let refreshDivs = refreshRunning.concat(refreshLateReg)
       let div = refreshDivs[i]
       await div.click()
-      await waitFor(2000)
+      await waitFor(2500)
       let [backButton] = await page.$x('//div[@class="navigation-panel-back-content"]')
       await backButton.click()
       await waitFor(2000)
@@ -116,7 +116,7 @@ const main = async (getCompleted) => {
     if (getCompleted) {
       let [statusButton] = await page.$x('//div[@class="tournament-list-header"]/div[contains(@class,"tournament-status")]')
       await statusButton.click()
-      await waitFor(2000)
+      await waitFor(2500)
       await statusButton.click()
       await waitFor(2000)
       const completedDivs = await page.$x('//div[@class="tournaments"]//div[@class="panel tournament-line completed"]')
@@ -125,10 +125,10 @@ const main = async (getCompleted) => {
         let refreshCompleted = await page.$x('//div[@class="tournaments"]//div[@class="panel tournament-line completed"]')
         let div = refreshCompleted[i]
         await div.click()
-        await waitFor(2000)
+        await waitFor(2500)
         let [backButton] = await page.$x('//div[@class="navigation-panel-back-content"]')
         await backButton.click()
-        await waitFor(2000)
+        await waitFor(2500)
 
       }
 
